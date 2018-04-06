@@ -1,0 +1,8 @@
+[package]
+name = "prog-lang-trans"
+version = "0.1.0"
+authors = ["Brian Broll <brian.broll@gmail.com>"]
+
+[dependencies]
+reqwest = "0.8.5"
+select = "0.4.2"
