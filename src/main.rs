@@ -29,30 +29,15 @@ fn get_code_snippets(url: &str) {
     let mut resp = reqwest::get(full_url.as_str()).unwrap();
 
     let html = resp.text().unwrap();
-    println!("text: {}", html);
 
     let doc = Html::parse_document(&html);
     let selector = Selector::parse(".ruby.highlighted_source").unwrap();
+    // TODO: This gets code for "Crystal" as well...
 
     for node in doc.select(&selector) {
-        println!("ruby code: {}", node.html());
+        let text = node.text().collect::<Vec<_>>().join("");
+        println!("ruby code: {:?}", text);
     }
-    /*
-    doc.select(&selector).map(|node| {
-        let title = node.value().attr("title").unwrap();
-        let href = node.value().attr("href").unwrap();
-        Task{title: String::from(title), href: String::from(href)}
-    }).collect()
-    */
-    //let doc = Document::from_read(resp)
-        //.unwrap();
-
-    //let nodes = doc.find(Class("c"))
-        //.into_selection()
-        //.filter(Class("highlighted_source"));
-
-    //println!("Received: {}", nodes.len());
-    //println!("Content: {}", nodes.first().unwrap().text());
 }
 
 fn main() {
