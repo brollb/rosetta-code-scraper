@@ -4,6 +4,8 @@ extern crate scraper;
 use scraper::{Html,Selector};
 
 use std::vec::Vec;
+use std::fs;
+use std::io::prelude::*;
 
 struct Task {
     title: String,
@@ -146,17 +148,22 @@ fn parse_code_snippet(element: scraper::ElementRef) -> Option<String> {
 fn main() {
     let first_task = &get_task_names()[0];
     let snippets = get_code_snippets(&first_task);
+    let base_data_dir = String::from("data/");
 
     println!("About to print the detected languages");
     for snippet in snippets {
-        // Make a directory for each task
-        // TODO
-        // Make a directory for each language
-        // TODO
+        // Make a directory for each language, task
+        let dir_path = base_data_dir.clone() + &snippet.lang + "/";  // + &snippet.task + "/";
+        //let dir_path = snippet.lang + "/" + &snippet.task + "/";
+        fs::create_dir_all(dir_path.clone()).unwrap();
+
         // Write the solution for that language in that directory
         // TODO
-        println!("{}", snippet.lang);
-        println!("{}", snippet.code);
-        println!("");
+        let file_path = dir_path + &snippet.task;
+        let mut file = fs::File::create(file_path.clone()).unwrap();
+        match file.write_all(snippet.code.as_bytes()) {
+            Ok(_) => println!("created {}", file_path),
+            Err(err) =>  println!("could not write {}: {}", file_path, err)
+        }
     }
 }
