@@ -41,12 +41,6 @@ fn get_code_snippets(task: &Task) -> Vec<CodeSnippet> {
 
     let doc = Html::parse_document(&html);
     let selector = Selector::parse(".highlighted_source").unwrap();
-    //let selector = Selector::parse(".ruby.highlighted_source").unwrap();
-    // TODO: This gets code for "Crystal" as well...
-    // Fi
-
-    // Record the language of the snippet
-    // TODO
 
     let mut snippets = Vec::new();
     eprintln!("found {} matches", doc.select(&selector).count());
@@ -60,7 +54,6 @@ fn get_code_snippets(task: &Task) -> Vec<CodeSnippet> {
                         lang: title.to_string(),
                         code
                 };
-                //println!("{}\n{}", title, snippet.code);
                 snippets.push(snippet);
             } else {
                 eprintln!("Skipping {} (nested span)", title);
@@ -121,12 +114,6 @@ fn parse_code_snippet(element: scraper::ElementRef) -> Option<String> {
                         }
                     } else {  // Ignore doubly nested spans for now
                         return None;
-                        //let nested_child = span_child_node.first_child().unwrap().value();
-                        //if let Some(text) = nested_child.as_text() {
-                            //code += text;
-                        //} else {
-                            //println!("found span with no text... weird {:?}", nested_child);
-                        //}
                     }
                 },
                 "br" => {
