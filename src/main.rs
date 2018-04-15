@@ -5,6 +5,7 @@ use scraper::{Html,Selector};
 
 use std::vec::Vec;
 use std::fs;
+use std::str;
 use std::io::prelude::*;
 
 struct Task {
@@ -48,11 +49,11 @@ fn get_code_snippets(task: &Task) -> Vec<CodeSnippet> {
     // TODO
 
     let mut snippets = Vec::new();
-    println!("found {} matches", doc.select(&selector).count());
+    eprintln!("found {} matches", doc.select(&selector).count());
     for code_segment in doc.select(&selector) {
         // Look up the language for the given snippet
         if let Some(title) = find_preceding_title(code_segment) {
-            println!("Found title: {}", title);
+            eprintln!("Found title: {}", title);
             if let Some(code) = parse_code_snippet(code_segment) {
                 let snippet = CodeSnippet{
                         task: task.title.clone(),
@@ -62,12 +63,12 @@ fn get_code_snippets(task: &Task) -> Vec<CodeSnippet> {
                 //println!("{}\n{}", title, snippet.code);
                 snippets.push(snippet);
             } else {
-                println!("Skipping {} (nested span)", title);
+                eprintln!("Skipping {} (nested span)", title);
             }
         }
     }
 
-    println!("found {} snippets", snippets.len());
+    eprintln!("found {} snippets", snippets.len());
     snippets
 }
 
@@ -96,7 +97,7 @@ fn find_preceding_title(element: scraper::ElementRef) -> Option<&str> {
 /// Given a element containing a code snippet, parse the code from the html
 /// elements
 fn parse_code_snippet(element: scraper::ElementRef) -> Option<String> {
-    println!("about to parse code snippet");
+    eprintln!("about to parse code snippet");
     let mut code = String::new();
     for child in element.children() {
         let node = child.value();
@@ -116,7 +117,7 @@ fn parse_code_snippet(element: scraper::ElementRef) -> Option<String> {
                         if let Some(text) = child_node.as_text() {
                             code += text;
                         } else {
-                            println!("found span with no text... weird {:?}", child_node);
+                            eprintln!("found span with no text... weird {:?}", child_node);
                         }
                     } else {  // Ignore doubly nested spans for now
                         return None;
@@ -132,7 +133,7 @@ fn parse_code_snippet(element: scraper::ElementRef) -> Option<String> {
                     code += "\n";
                 },
                 _ => {
-                    println!("element tag not supported");
+                    eprintln!("element tag not supported");
                 }
             }
 
@@ -146,24 +147,31 @@ fn parse_code_snippet(element: scraper::ElementRef) -> Option<String> {
 }
 
 fn main() {
-    let first_task = &get_task_names()[0];
-    let snippets = get_code_snippets(&first_task);
     let base_data_dir = String::from("data/");
+    let mut example_count = 0;
 
-    println!("About to print the detected languages");
-    for snippet in snippets {
-        // Make a directory for each language, task
-        let dir_path = base_data_dir.clone() + &snippet.lang + "/";  // + &snippet.task + "/";
-        //let dir_path = snippet.lang + "/" + &snippet.task + "/";
-        fs::create_dir_all(dir_path.clone()).unwrap();
+    for task in get_task_names() {
+        let snippets = get_code_snippets(&task);
 
-        // Write the solution for that language in that directory
-        // TODO
-        let file_path = dir_path + &snippet.task;
-        let mut file = fs::File::create(file_path.clone()).unwrap();
-        match file.write_all(snippet.code.as_bytes()) {
-            Ok(_) => println!("created {}", file_path),
-            Err(err) =>  println!("could not write {}: {}", file_path, err)
+        println!("About to print the detected languages");
+        for snippet in snippets {
+            // Make a directory for each language, task
+            let dir_path = base_data_dir.clone() + &snippet.lang + "/";  // + &snippet.task + "/";
+            eprintln!("about to mkdir -p {}", dir_path.clone());
+            fs::create_dir_all(dir_path.clone()).unwrap();
+
+            // Write the solution for that language in that directory
+            let file_path = dir_path + &str::replace(&snippet.task, "/", "-");
+            eprintln!("about to write file {}", file_path.clone());
+            let mut file = fs::File::create(file_path.clone()).unwrap();
+            match file.write_all(snippet.code.as_bytes()) {
+                Ok(_) => {
+                    example_count += 1;
+                    println!("created {}", file_path);
+                },
+                Err(err) =>  println!("could not write {}: {}", file_path, err)
+            }
         }
     }
+    println!("Saved {} code snippets", example_count);
 }
