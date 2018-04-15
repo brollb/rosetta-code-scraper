@@ -3,5 +3,7 @@ This is a web scraper for retrieving the code examples for the various tasks for
 
 RosettaCode content is made available under the [GNU Free Documentation License 1.2](https://www.gnu.org/licenses/fdl-1.2.html).
 
+The code snippets will be downloaded to `data/` within the current working directory.
+
 ## Quick Start
 The easiest way to run the scraper is to simply run `cargo run` from within the project.
