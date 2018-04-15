@@ -54,7 +54,7 @@ fn get_code_snippets(task: &Task) -> Vec<CodeSnippet> {
             if let Some(code) = parse_code_snippet(code_segment) {
                 let snippet = CodeSnippet{
                         task: task.title.clone(),
-                        lang: String::from("None"),
+                        lang: title.to_string(),
                         code
                 };
                 //println!("{}\n{}", title, snippet.code);
@@ -146,16 +146,17 @@ fn parse_code_snippet(element: scraper::ElementRef) -> Option<String> {
 fn main() {
     let first_task = &get_task_names()[0];
     let snippets = get_code_snippets(&first_task);
-    if snippets.len() > 0 {
-        let snippet = &snippets[0];
-        //println!("snippet:\n{}", snippet.code);
-    } else {
-        println!("no results found.");
-    }
 
-    //for task in get_task_names() {
-        //get_code_snippets(&task.href);
-        //println!("{}", );
-    //}
-    //println!("task names: {:?}", get_task_names());
+    println!("About to print the detected languages");
+    for snippet in snippets {
+        // Make a directory for each task
+        // TODO
+        // Make a directory for each language
+        // TODO
+        // Write the solution for that language in that directory
+        // TODO
+        println!("{}", snippet.lang);
+        println!("{}", snippet.code);
+        println!("");
+    }
 }
